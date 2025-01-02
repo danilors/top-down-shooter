@@ -16,17 +16,30 @@ function love.load()
 
     bullets = {}
     bulletSpeed = 500
+
+    gameState = 1
+    maxTime = 2
+    timer = maxTime
+
+    textFont = love.graphics.newFont(30)
 end
 
 function love.update(dt)
+    
     playerKeyBoardActions(dt)
     zombieMovement(dt)
     bulletsMovement(dt)
-    zombieBulletsColision(dt)
+    zombieBulletsCollision(dt)
+    autoSpawnZombies(dt)
 end
 
 function love.draw()
     love.graphics.draw(sprites.background, 0, 0)
+    love.graphics.print("timer: " .. timer)
+    if (gameState == 1) then
+        love.graphics.setFont(textFont)
+        love.graphics.printf("Click anywhere to begin!", 0, 50, love.graphics.getWidth(), "center")
+    end
 
     love.graphics.draw(
         sprites.player,
@@ -66,24 +79,20 @@ function love.draw()
 end
 
 function playerKeyBoardActions(dt)
-    local playerSpeed = player.speed * dt
-    if love.keyboard.isDown("d") then
-        player.x = player.x + playerSpeed
-    end
-    if love.keyboard.isDown("a") then
-        player.x = player.x - playerSpeed
-    end
-    if love.keyboard.isDown("w") then
-        player.y = player.y - playerSpeed
-    end
-    if love.keyboard.isDown("s") then
-        player.y = player.y + playerSpeed
-    end
-end
-
-function love.keypressed(key)
-    if key == "space" then
-        spawnZombie()
+    if gameState == 2 then
+        local playerSpeed = player.speed * dt
+        if love.keyboard.isDown("d") then
+            player.x = player.x + playerSpeed
+        end
+        if love.keyboard.isDown("a") then
+            player.x = player.x - playerSpeed
+        end
+        if love.keyboard.isDown("w") then
+            player.y = player.y - playerSpeed
+        end
+        if love.keyboard.isDown("s") then
+            player.y = player.y + playerSpeed
+        end
     end
 end
 
@@ -97,10 +106,25 @@ end
 
 function spawnZombie()
     local zombie = {}
-    zombie.x = math.random(0, love.graphics.getWidth())
-    zombie.y = math.random(0, love.graphics.getHeight())
+    zombie.x = 0
+    zombie.y = 0
     zombie.speed = zombieSpeed
     zombie.dead = false
+
+    local side = math.random(1, 4)
+    if side == 1 then
+        zombie.x = -30
+        zombie.y = math.random(0, love.graphics.getHeight())
+    elseif side == 2 then
+        zombie.x = love.graphics.getWidth() + 30
+        zombie.y = math.random(0, love.graphics.getHeight())
+    elseif side == 3 then
+        zombie.x = math.random(0, love.graphics.getWidth() + 30)
+        zombie.y = -30
+    elseif side == 4 then
+        zombie.x = math.random(0, love.graphics.getWidth())
+        zombie.y = love.graphics.getHeight() + 30
+    end
     table.insert(zombies, zombie)
 end
 
@@ -109,9 +133,12 @@ function zombieMovement(dt)
         z.x = z.x + (math.cos(zombiePlayerAngle(z)) * z.speed * dt)
         z.y = z.y + (math.sin(zombiePlayerAngle(z)) * z.speed * dt)
 
-        if distanceBetween(z.x, z.y, player.x, player.y) < 50 then
+        if distanceBetween(z.x, z.y, player.x, player.y) < 30 then
             for j, z in ipairs(zombies) do
                 zombies[j] = nil
+                gameState = 1
+                player.x = love.graphics.getWidth() / 2
+                player.y = love.graphics.getHeight() / 2
             end
         end
     end
@@ -146,21 +173,25 @@ function spawnBullet()
 end
 
 function love.mousepressed(x, y, button)
-    if button == 1 then
+    if button == 1 and gameState == 2 then
         spawnBullet()
+    elseif button == 1 and gameState == 1 then
+        gameState = 2
+        maxTime = 2
+        timer = maxTime
     end
 end
 
-function zombieBulletsColision(dt)
+function zombieBulletsCollision(dt)
     for i, z in ipairs(zombies) do
         for j, b in ipairs(bullets) do
             if distanceBetween(z.x, z.y, b.x, b.y) < 20 then
-                z.dead = true;
+                z.dead = true
                 b.dead = true
             end
         end
     end
-    
+
     for i = #zombies, 1, -1 do
         local z = zombies[i]
         if z.dead == true then
@@ -171,6 +202,17 @@ function zombieBulletsColision(dt)
         local b = bullets[i]
         if b.dead == true then
             table.remove(bullets, i)
+        end
+    end
+end
+
+function autoSpawnZombies(dt)
+    if gameState == 2 then
+        timer = timer - dt
+        if timer <= 0 then
+            spawnZombie()
+            maxTime = 0.95 * maxTime
+            timer = maxTime
         end
     end
 end
