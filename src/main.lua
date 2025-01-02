@@ -22,6 +22,7 @@ function love.load()
     gameState = 1
     maxTime = 2
     timer = maxTime
+    score = 0
 
     textFont = love.graphics.newFont(30)
 end
@@ -41,6 +42,8 @@ function love.draw()
         love.graphics.setFont(textFont)
         love.graphics.printf("Click anywhere to begin!", 0, 50, love.graphics.getWidth(), "center")
     end
+
+    love.graphics.printf("score: " .. score, 0, love.graphics.getHeight() - 100, love.graphics.getWidth(), "center")
 
     love.graphics.draw(
         sprites.player,
@@ -180,6 +183,7 @@ function love.mousepressed(x, y, button)
         gameState = 2
         maxTime = 2
         timer = maxTime
+        score = 0
     end
 end
 
@@ -189,6 +193,7 @@ function zombieBulletsCollision(dt)
             if distanceBetween(z.x, z.y, b.x, b.y) < 20 then
                 z.dead = true
                 b.dead = true
+                score = score + 1
             end
         end
     end
