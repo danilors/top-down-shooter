@@ -1,4 +1,6 @@
 function love.load()
+    math.randomseed(os.time())
+
     sprites = {}
     sprites.background = love.graphics.newImage("assets/sprites/background.png")
     sprites.bullet = love.graphics.newImage("assets/sprites/bullet.png")
@@ -25,7 +27,6 @@ function love.load()
 end
 
 function love.update(dt)
-    
     playerKeyBoardActions(dt)
     zombieMovement(dt)
     bulletsMovement(dt)
@@ -35,7 +36,7 @@ end
 
 function love.draw()
     love.graphics.draw(sprites.background, 0, 0)
-    love.graphics.print("timer: " .. timer)
+
     if (gameState == 1) then
         love.graphics.setFont(textFont)
         love.graphics.printf("Click anywhere to begin!", 0, 50, love.graphics.getWidth(), "center")
@@ -81,16 +82,16 @@ end
 function playerKeyBoardActions(dt)
     if gameState == 2 then
         local playerSpeed = player.speed * dt
-        if love.keyboard.isDown("d") then
+        if love.keyboard.isDown("d") and player.x < love.graphics.getWidth() then
             player.x = player.x + playerSpeed
         end
-        if love.keyboard.isDown("a") then
+        if love.keyboard.isDown("a") and player.x > 0 then
             player.x = player.x - playerSpeed
         end
-        if love.keyboard.isDown("w") then
+        if love.keyboard.isDown("w") and player.y > 0 then
             player.y = player.y - playerSpeed
         end
-        if love.keyboard.isDown("s") then
+        if love.keyboard.isDown("s") and player.y < love.graphics.getHeight() then
             player.y = player.y + playerSpeed
         end
     end
