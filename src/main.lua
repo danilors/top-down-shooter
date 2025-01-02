@@ -12,6 +12,7 @@ function love.load()
     player.speed = 5 * frameRate
 
     zombies = {}
+    zombieSpeed = 140
 end
 
 function love.update(dt)
@@ -80,7 +81,7 @@ function spawnZombie()
     local zombie = {}
     zombie.x = math.random(0, love.graphics.getWidth())
     zombie.y = math.random(0, love.graphics.getHeight())
-    zombie.speed = 100
+    zombie.speed = zombieSpeed
     table.insert(zombies, zombie)
 end
 
@@ -88,5 +89,15 @@ function zombieMovement(dt)
     for i, z in ipairs(zombies) do
         z.x = z.x + (math.cos(zombiePlayerAngle(z)) * z.speed * dt)
         z.y = z.y + (math.sin(zombiePlayerAngle(z)) * z.speed * dt)
+   
+        if distanceBetween(z.x, z.y, player.x, player.y) < 100 then
+            for j, z in ipairs(zombies) do
+                zombies[j] = nil
+            end
+        end
     end
+end
+
+function distanceBetween(x1, y1, x2, y2)
+    return math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2)
 end
