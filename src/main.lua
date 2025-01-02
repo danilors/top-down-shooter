@@ -9,13 +9,11 @@ function love.load()
     player = {}
     player.x = love.graphics.getWidth() / 2
     player.y = love.graphics.getHeight() / 2
-    tempRotation = 0
     player.speed = 5 * frameRate
 end
 
 function love.update(dt)
     keyBoardActions(dt)
-    tempRotation = tempRotation + 0.01
 end
 
 function love.draw()
@@ -25,7 +23,7 @@ function love.draw()
         sprites.player,
         player.x,
         player.y,
-        tempRotation,
+        playerMouseAngle(),
         nil,
         nil,
         sprites.player:getWidth() / 2,
@@ -47,4 +45,9 @@ function keyBoardActions(dt)
     if love.keyboard.isDown("s") then
         player.y = player.y + playerSpeed
     end
+end
+
+
+function playerMouseAngle()
+    return math.atan2(player.y - love.mouse.getY(), player.x - love.mouse.getX()) + math.pi
 end
